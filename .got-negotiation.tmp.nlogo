@@ -40,7 +40,6 @@ to go
     stop
   ]
   tick
-end
 
 to move-families
   ask starks [
