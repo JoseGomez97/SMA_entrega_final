@@ -1,14 +1,19 @@
 breed[starks stark]
 breed[baratheons baratheon]
 
-starks-own[strength]
-baratheons-own[strength]
+turtles-own[
+  money
+  strength
+  willing;;what we offer (buyer)
+  price;;what we ask (seller)
+]
+
 
 to setup
   clear-all
   reset-ticks
   setup-patches
-  setup-territories
+  setup-lords
 end
 
 to setup-patches
@@ -17,20 +22,41 @@ to setup-patches
   ]
 end
 
-to setup-territories
+to setup-lords
   create-starks num-starks
-  ask starks [ setxy (random-float 8) + 8 random-ycor set shape "wolf" set color blue set size 2 ]
+  ask starks [
+    setxy (random-float 8) + 8 random-ycor
+    set shape "wolf"
+    set color blue
+    set size 2
+    set strength init-strength
+    set money init-money
+    set label strength
+    set price money;;to do: change for a slider
+    set willing (money / 5);;to do: change for a slider
+  ]
 
   create-baratheons num-baratheons
-  ask baratheons [ setxy (random-float -8) - 8  random-ycor set shape "moose" set color brown set size 2 ]
+  ask baratheons [
+    setxy (random-float -8) - 8  random-ycor
+    set shape "moose"
+    set color brown
+    set size 2
+    set strength init-strength
+    set money init-money
+    set label strength
+    set price money;;TODO: change for a slider
+    set willing (money / 5);;TODO: change for a slider
+  ]
 end
 
 to go
   if ticks >= 50000 [ stop ]  ;; stop after 500 ticks
   move-families
-  negotiate
+  to-do?
   spawn-new
-  ;;Wins
+  updates
+  ;;WINS
   if (count baratheons) = 0 [
     show "starks win!"
     stop
@@ -43,38 +69,43 @@ to go
 end
 
 to move-families
+  ;;STARKS MOVES
   ask starks [
-    if strength-starks-prob > random 100 [
+    if (probability-to-win-strength > random 100) and (pcolor = 107)[;only if they're on a own patch, they can get strength
      set strength strength + 1
+    ]
+    if loss-to-conquer and (pcolor = 37)[;if they're on a rival patch, they can loss strength to conquer it
+     set strength strength - strength-to-loss
     ]
     set pcolor 107
   ]
+  ;;BARATHEONS MOVES
   ask baratheons [
-    if strength-baratheons-prob > random 100 [
+    if (probability-to-win-strength > random 100) and (pcolor = 37) [;only if they're on a own patch, they can get strength
      set strength strength + 1
+    ]
+    if loss-to-conquer and (pcolor = 107) [;if they're on a rival patch, they can loss strength to conquer it
+     set strength strength - strength-to-loss
     ]
     set pcolor 37
   ]
-  ask turtles [
-    right random 360
-    forward 1
+  ;;GENERAL MOVE
+  ask turtles [;;General move, after stay at home or conquer a rival's patch
+    general-move
   ]
 end
 
-to negotiate
-  ask patches [
-    ask turtles-here [
-      if (color = brown) [ ; baratheon here
-        if any? other starks-here [
-          die
-        ]
-      ]
-      if (color = blue) [ ; starks here
-        if any? other baratheons-here [
-          die
-        ]
-      ]
+to general-move
+  right random 360
+  forward 1
+end
 
+to to-do?
+  ask patches [
+    if (any? starks-here) and (any? baratheons-here) [
+      ifelse pcolor = "white" ;;if is a blank patch: we will fight for it; else: we will negotiate for it
+      [fight]
+      [negotiate]
     ]
   ]
 end
@@ -90,6 +121,76 @@ to spawn-new
       if spawn-prob > random-float 100 [
         sprout-starks 1 [setxy pxcor pycor set shape "wolf" set color blue set size 2 ]
       ]
+    ]
+  ]
+end
+
+to negotiate
+  show "TO NEGOTIATE!";;to Debug
+  ;;Control of who is seller and who is buyer
+  let the-seller [who] of one-of starks-here
+  let the-buyer [who] of one-of baratheons-here
+  if pcolor = 37
+  [;; if patch color is brown: starks try to buy it; else: baratheons try to buy it
+    set the-seller [who] of one-of baratheons-here
+    set the-buyer [who] of one-of starks-here
+  ]
+  ;;NEGOTIATION
+  let to-deal false
+  let asking [price] of one-of turtles-here with [who = the-seller]
+  let offer [willing] of one-of turtles-here with [who = the-buyer]
+  let i 0
+  while [(to-deal = false) and (i < tries-to-deal)] [
+    if asking <= offer [;;if we arrive to a deal, seller sells the patch
+      sell-patch the-seller the-buyer
+      set to-deal true
+    ]
+    ;;TODO: Negotatiation steps unde here
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    ;;
+    set i i + 1
+  ]
+  if to-deal = false [fight]
+end
+
+to sell-patch [seller buyer];;Function that do the payment
+  let payment [willing] of turtles with [who = buyer]
+  ask turtles-here[
+    if who = buyer [;;The buyer stays on the
+      set money money - payment
+      ifelse breed = starks
+      [set pcolor 107]
+      [set pcolor 37]
+    ]
+    if who = seller [
+      set money money + payment
+      general-move
+    ]
+  ]
+end
+
+to fight;;A fight, where all the lords loss strength due to rival strength
+  show "FIGTH!";;to Debug
+  ;;THE FIGTH
+  let aux-s-strength [strength] of one-of starks-here
+  let aux-b-strength [strength] of one-of baratheons-here
+  ask starks-here[
+    set strength strength - aux-b-strength
+  ]
+  ask baratheons-here[
+    set strength strength - aux-s-strength
+  ]
+end
+
+to updates
+  ask turtles[
+    set label strength
+    if strength < 0 [
+      die
     ]
   ]
 end
@@ -122,10 +223,10 @@ ticks
 30.0
 
 BUTTON
-21
-42
-84
-75
+24
+121
+87
+154
 setup
 setup
 NIL
@@ -139,15 +240,15 @@ NIL
 1
 
 SLIDER
-687
-276
-859
-309
+3
+229
+175
+262
 num-starks
 num-starks
 0
 10
-5.0
+10.0
 1
 1
 NIL
@@ -162,22 +263,7 @@ num-baratheons
 num-baratheons
 0
 10
-5.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-687
-324
-859
-357
-strength-starks-prob
-strength-starks-prob
-0
-100
-50.0
+10.0
 1
 1
 NIL
@@ -186,23 +272,23 @@ HORIZONTAL
 SLIDER
 5
 330
-200
+203
 363
-strength-baratheons-prob
-strength-baratheons-prob
+probability-to-win-strength
+probability-to-win-strength
 0
 100
-50.0
+22.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-108
-42
-171
-75
+111
+121
+174
+154
 go
 go
 T
@@ -214,6 +300,54 @@ NIL
 NIL
 NIL
 1
+
+MONITOR
+9
+166
+86
+211
+Baratheons
+count baratheons
+17
+1
+11
+
+MONITOR
+115
+168
+172
+213
+Starks
+count starks
+17
+1
+11
+
+SWITCH
+22
+375
+164
+408
+loss-to-conquer
+loss-to-conquer
+0
+1
+-1000
+
+SLIDER
+15
+423
+187
+456
+strength-to-loss
+strength-to-loss
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
 
 SLIDER
 693
@@ -230,27 +364,50 @@ spawn-prob
 NIL
 HORIZONTAL
 
-MONITOR
-38
-110
-115
-155
-Baratheons
-count baratheons
-17
+SLIDER
+36
+12
+208
+45
+init-strength
+init-strength
+0
+500
+400.0
+10
 1
-11
+NIL
+HORIZONTAL
 
-MONITOR
-748
-117
-805
-162
-Starks
-count starks
-17
+SLIDER
+29
+57
+201
+90
+init-money
+init-money
+0
+500
+250.0
+10
 1
-11
+NIL
+HORIZONTAL
+
+SLIDER
+695
+267
+867
+300
+tries-to-deal
+tries-to-deal
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
