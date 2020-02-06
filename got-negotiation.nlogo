@@ -2,10 +2,11 @@ breed[starks stark]
 breed[baratheons baratheon]
 
 turtles-own[
-  money
   strength
   willing;;what we offer (buyer)
   price;;what we ask (seller)
+  RU
+  beta
 ]
 
 
@@ -30,10 +31,11 @@ to setup-lords
     set color blue
     set size 2
     set strength init-strength
-    set money init-money
     set label strength
-    set price money;;to do: change for a slider
-    set willing (money / 5);;to do: change for a slider
+    set RU init-RU
+    set beta 1
+    set price strength;;to do: change for a slider
+    set willing (strength / 5.0);;to do: change for a slider
   ]
 
   create-baratheons num-baratheons
@@ -43,10 +45,11 @@ to setup-lords
     set color brown
     set size 2
     set strength init-strength
-    set money init-money
     set label strength
-    set price money;;TODO: change for a slider
-    set willing (money / 5);;TODO: change for a slider
+    set RU init-RU
+    set beta 1
+    set price strength;;TODO: change for a slider
+    set willing (strength / 5.0);;TODO: change for a slider
   ]
 end
 
@@ -139,38 +142,47 @@ to negotiate
   let to-deal false
   let asking [price] of one-of turtles-here with [who = the-seller]
   let offer [willing] of one-of turtles-here with [who = the-buyer]
-  let i 0
+  let i 0.0
+  let Sbuyer 1.0
+  let Sseller 1.0
   while [(to-deal = false) and (i < tries-to-deal)] [
-    if asking <= offer [;;if we arrive to a deal, seller sells the patch
-      sell-patch the-seller the-buyer
+    ifelse asking <= offer [;;if we arrive to a deal, seller sells the patch
+      sell-patch the-seller the-buyer offer
       set to-deal true
     ]
-    ;;TODO: Negotatiation steps unde here
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    ;;
-    set i i + 1
+    [
+      ;;TODO: Negotatiation steps unde here
+
+      set Sbuyer nego-temporal the-buyer i
+      set Sseller nego-temporal the-seller i
+      set asking asking * Sseller
+      set offer offer * (2.0 - Sseller)
+    ]
+
+    set i i + 1.0
   ]
   if to-deal = false [fight]
 end
 
-to sell-patch [seller buyer];;Function that do the payment
-  let payment [willing] of turtles with [who = buyer]
+to sell-patch [seller buyer payment];;Function that do the payment
   ask turtles-here[
     if who = buyer [;;The buyer stays on the
-      set money money - payment
+      set strength strength - payment
       ifelse breed = starks
       [set pcolor 107]
       [set pcolor 37]
     ]
     if who = seller [
-      set money money + payment
+      set strength strength + payment
       general-move
     ]
   ]
+end
+
+to-report nego-temporal[agent t]
+  let r [RU] of one-of turtles with [who = agent]
+  let b [beta] of one-of turtles with [who = agent]
+  report (1.0 - (1.0 - r))*((t / tries-to-deal)^(1.0 / b))
 end
 
 to fight;;A fight, where all the lords loss strength due to rival strength
@@ -371,10 +383,10 @@ SLIDER
 45
 init-strength
 init-strength
-0
-500
+0.0
+500.0
 400.0
-10
+10.0
 1
 NIL
 HORIZONTAL
@@ -384,27 +396,27 @@ SLIDER
 57
 201
 90
-init-money
-init-money
+init-RU
+init-RU
 0
-500
-250.0
-10
+1
+0.1
+0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-695
-267
-867
-300
+694
+66
+866
+99
 tries-to-deal
 tries-to-deal
-0
-100
-50.0
-1
+0.0
+100.0
+49.0
+1.0
 1
 NIL
 HORIZONTAL
