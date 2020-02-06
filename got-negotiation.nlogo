@@ -33,9 +33,17 @@ to setup-lords
     set strength init-strength
     set label strength
     set RU init-RU
-    set beta 1
     set price strength;;to do: change for a slider
     set willing (strength / 5.0);;to do: change for a slider
+    ifelse starks-strategy = "boulware"[
+      set beta 0.25
+    ]
+    [
+      ifelse starks-strategy = "lineal"[
+        set beta 1
+      ]
+      [set beta 5]
+    ]
   ]
 
   create-baratheons num-baratheons
@@ -47,9 +55,17 @@ to setup-lords
     set strength init-strength
     set label strength
     set RU init-RU
-    set beta 1
     set price strength;;TODO: change for a slider
     set willing (strength / 5.0);;TODO: change for a slider
+    ifelse baratheons-strategy = "boulware"[
+      set beta 0.25
+    ]
+    [
+      ifelse baratheons-strategy = "lineal"[
+        set beta 1
+      ]
+      [set beta 5]
+    ]
   ]
 end
 
@@ -141,6 +157,7 @@ to negotiate
   ;;NEGOTIATION
   let to-deal false
   let asking [price] of one-of turtles-here with [who = the-seller]
+  let start-offer [willing] of one-of turtles-here with [who = the-buyer]
   let offer [willing] of one-of turtles-here with [who = the-buyer]
   let i 1.0
   let Sbuyer 1.0
@@ -156,12 +173,13 @@ to negotiate
       set Sbuyer nego-temporal the-buyer i
       set Sseller nego-temporal the-seller i
       set asking asking * Sbuyer
-      set offer offer * (2.0 - Sseller)
+      set offer start-offer * (2.0 - Sseller)
+      show asking
+      show offer
     ]
 
     set i i + 1.0
   ]
-  show Sbuyer
   if to-deal = false [fight]
 end
 
@@ -363,15 +381,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-693
-21
-865
-54
+701
+20
+873
+53
 spawn-prob
 spawn-prob
 0
 10
-0.0
+0.5
 0.1
 1
 NIL
@@ -401,7 +419,7 @@ init-RU
 init-RU
 0
 1
-0.1
+0.35
 0.01
 1
 NIL
@@ -421,6 +439,45 @@ tries-to-deal
 1
 NIL
 HORIZONTAL
+
+PLOT
+692
+235
+892
+385
+Turtles Graphics
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"baratheons" 1.0 0 -6459832 true "" "plot sum [strength] of baratheons"
+"starks" 1.0 0 -13345367 true "" "plot sum [strength] of starks"
+
+CHOOSER
+692
+116
+830
+161
+starks-strategy
+starks-strategy
+"boulware" "lineal" "conceder"
+2
+
+CHOOSER
+694
+175
+834
+220
+baratheons-strategy
+baratheons-strategy
+"boulware" "lineal" "conceder"
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
