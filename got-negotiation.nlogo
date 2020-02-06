@@ -142,10 +142,10 @@ to negotiate
   let to-deal false
   let asking [price] of one-of turtles-here with [who = the-seller]
   let offer [willing] of one-of turtles-here with [who = the-buyer]
-  let i 0.0
+  let i 1.0
   let Sbuyer 1.0
   let Sseller 1.0
-  while [(to-deal = false) and (i < tries-to-deal)] [
+  while [(to-deal = false) and (i <= tries-to-deal)] [
     ifelse asking <= offer [;;if we arrive to a deal, seller sells the patch
       sell-patch the-seller the-buyer offer
       set to-deal true
@@ -155,12 +155,13 @@ to negotiate
 
       set Sbuyer nego-temporal the-buyer i
       set Sseller nego-temporal the-seller i
-      set asking asking * Sseller
+      set asking asking * Sbuyer
       set offer offer * (2.0 - Sseller)
     ]
 
     set i i + 1.0
   ]
+  show Sbuyer
   if to-deal = false [fight]
 end
 
