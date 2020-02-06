@@ -31,7 +31,7 @@ to setup-lords
     set color blue
     set size 2
     set strength init-strength
-    set label strength
+    set label precision strength 2
     set RU init-RU
     set price strength;;to do: change for a slider
     set willing (strength / 5.0);;to do: change for a slider
@@ -40,9 +40,9 @@ to setup-lords
     ]
     [
       ifelse starks-strategy = "lineal"[
-        set beta 1
+        set beta 1.0
       ]
-      [set beta 5]
+      [set beta 5.0]
     ]
   ]
 
@@ -53,7 +53,7 @@ to setup-lords
     set color brown
     set size 2
     set strength init-strength
-    set label strength
+    set label precision strength 2
     set RU init-RU
     set price strength;;TODO: change for a slider
     set willing (strength / 5.0);;TODO: change for a slider
@@ -62,9 +62,9 @@ to setup-lords
     ]
     [
       ifelse baratheons-strategy = "lineal"[
-        set beta 1
+        set beta 1.0
       ]
-      [set beta 5]
+      [set beta 5.0]
     ]
   ]
 end
@@ -133,12 +133,50 @@ to spawn-new
   ask patches [
     if pcolor = 37 [
       if spawn-prob > random-float 100 [
-        sprout-baratheons 1 [setxy pxcor pycor set shape "moose" set color brown set size 2 ]
+        sprout-baratheons 1 [
+          setxy pxcor pycor
+          set shape "moose"
+          set color brown
+          set size 2
+          set strength init-strength
+          set label precision strength 2
+          set RU init-RU
+          set price strength;;to do: change for a slider
+          set willing (strength / 5.0);;to do: change for a slider
+          ifelse starks-strategy = "boulware"[
+            set beta 0.25
+          ]
+          [
+            ifelse starks-strategy = "lineal"[
+              set beta 1.0
+            ]
+            [set beta 5.0]
+          ]
+        ]
       ]
     ]
     if pcolor = 107 [
       if spawn-prob > random-float 100 [
-        sprout-starks 1 [setxy pxcor pycor set shape "wolf" set color blue set size 2 ]
+        sprout-starks 1 [
+          setxy pxcor pycor
+          set shape "wolf"
+          set color blue
+          set size 2
+          set strength init-strength
+          set label precision strength 2
+          set RU init-RU
+          set price strength;;to do: change for a slider
+          set willing (strength / 5.0);;to do: change for a slider
+          ifelse starks-strategy = "boulware"[
+            set beta 0.25
+          ]
+          [
+            ifelse starks-strategy = "lineal"[
+              set beta 1.0
+            ]
+            [set beta 5.0]
+          ]
+        ]
       ]
     ]
   ]
@@ -199,8 +237,8 @@ to sell-patch [seller buyer payment];;Function that do the payment
 end
 
 to-report nego-temporal[agent t]
-  let r [RU] of one-of turtles with [who = agent]
-  let b [beta] of one-of turtles with [who = agent]
+  let r [RU] of one-of turtles-here with [who = agent]
+  let b [beta] of one-of turtles-here with [who = agent]
   report (1.0 - (1.0 - r))*((t / tries-to-deal)^(1.0 / b))
 end
 
@@ -219,7 +257,7 @@ end
 
 to updates
   ask turtles[
-    set label strength
+    set label precision strength 2
     if strength < 0 [
       die
     ]
@@ -278,8 +316,8 @@ SLIDER
 num-starks
 num-starks
 0
-10
-10.0
+20
+20.0
 1
 1
 NIL
@@ -293,8 +331,8 @@ SLIDER
 num-baratheons
 num-baratheons
 0
-10
-10.0
+20
+20.0
 1
 1
 NIL
@@ -309,7 +347,7 @@ probability-to-win-strength
 probability-to-win-strength
 0
 100
-22.0
+23.0
 1
 1
 NIL
@@ -322,7 +360,7 @@ BUTTON
 154
 go
 go
-T
+NIL
 1
 T
 OBSERVER
@@ -381,16 +419,16 @@ NIL
 HORIZONTAL
 
 SLIDER
-701
-20
-873
-53
+694
+19
+866
+52
 spawn-prob
 spawn-prob
 0
-10
-0.5
-0.1
+1
+0.09
+0.01
 1
 NIL
 HORIZONTAL
@@ -402,10 +440,10 @@ SLIDER
 45
 init-strength
 init-strength
-0.0
+1.0
 500.0
-400.0
-10.0
+376.0
+1.0
 1
 NIL
 HORIZONTAL
@@ -432,9 +470,9 @@ SLIDER
 99
 tries-to-deal
 tries-to-deal
-0.0
+1.0
 100.0
-49.0
+50.0
 1.0
 1
 NIL
@@ -445,7 +483,7 @@ PLOT
 235
 892
 385
-Turtles Graphics
+Strength Graphics
 NIL
 NIL
 0.0
@@ -467,7 +505,7 @@ CHOOSER
 starks-strategy
 starks-strategy
 "boulware" "lineal" "conceder"
-2
+1
 
 CHOOSER
 694
@@ -477,7 +515,7 @@ CHOOSER
 baratheons-strategy
 baratheons-strategy
 "boulware" "lineal" "conceder"
-0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
