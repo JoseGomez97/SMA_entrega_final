@@ -74,7 +74,7 @@ to go
   move-families
   to-do?
   spawn-new
-  updates
+  update
   ;;WINS
   if (count baratheons) = 0 [
     show "starks win!"
@@ -183,7 +183,6 @@ to spawn-new
 end
 
 to negotiate
-  show "TO NEGOTIATE!";;to Debug
   ;;Control of who is seller and who is buyer
   let the-seller [who] of one-of starks-here
   let the-buyer [who] of one-of baratheons-here
@@ -194,9 +193,10 @@ to negotiate
   ]
   ;;NEGOTIATION
   let to-deal false
-  let asking [price] of one-of turtles-here with [who = the-seller]
+  let start-asking [price] of one-of turtles-here with [who = the-seller]
+  let asking start-asking
   let start-offer [willing] of one-of turtles-here with [who = the-buyer]
-  let offer [willing] of one-of turtles-here with [who = the-buyer]
+  let offer start-offer
   let i 1.0
   let Sbuyer 1.0
   let Sseller 1.0
@@ -207,18 +207,18 @@ to negotiate
     ]
     [
       ;;TODO: Negotatiation steps unde here
-
       set Sbuyer nego-temporal the-buyer i
       set Sseller nego-temporal the-seller i
-      set asking asking * Sbuyer
-      set offer start-offer * (2.0 - Sseller)
-      show asking
-      show offer
+      set asking start-asking * Sseller
+      set offer start-offer / Sbuyer
     ]
 
     set i i + 1.0
   ]
-  if to-deal = false [fight]
+  if to-deal = false [
+    show "Ha fallado una negociación"
+    fight
+  ]
 end
 
 to sell-patch [seller buyer payment];;Function that do the payment
@@ -243,7 +243,6 @@ to-report nego-temporal[agent t]
 end
 
 to fight;;A fight, where all the lords loss strength due to rival strength
-  show "FIGTH!";;to Debug
   ;;THE FIGTH
   let aux-s-strength [strength] of one-of starks-here
   let aux-b-strength [strength] of one-of baratheons-here
@@ -255,10 +254,12 @@ to fight;;A fight, where all the lords loss strength due to rival strength
   ]
 end
 
-to updates
+to update
   ask turtles[
     set label precision strength 2
-    if strength < 0 [
+    set price strength
+    set willing (strength / 2.0)
+    if strength <= 0 [
       die
     ]
   ]
@@ -292,10 +293,10 @@ ticks
 30.0
 
 BUTTON
-24
-121
-87
-154
+30
+108
+93
+141
 setup
 setup
 NIL
@@ -309,10 +310,10 @@ NIL
 1
 
 SLIDER
-3
-229
-175
-262
+13
+221
+185
+254
 num-starks
 num-starks
 0
@@ -324,10 +325,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-14
-277
-186
-310
+13
+272
+185
+305
 num-baratheons
 num-baratheons
 0
@@ -339,10 +340,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-330
-203
-363
+1
+325
+199
+358
 probability-to-win-strength
 probability-to-win-strength
 0
@@ -354,13 +355,13 @@ NIL
 HORIZONTAL
 
 BUTTON
-111
-121
-174
-154
+117
+108
+180
+141
 go
 go
-NIL
+T
 1
 T
 OBSERVER
@@ -371,10 +372,10 @@ NIL
 1
 
 MONITOR
-9
-166
-86
-211
+21
+160
+98
+205
 Baratheons
 count baratheons
 17
@@ -382,10 +383,10 @@ count baratheons
 11
 
 MONITOR
-115
-168
-172
-213
+125
+160
+182
+205
 Starks
 count starks
 17
@@ -404,15 +405,15 @@ loss-to-conquer
 -1000
 
 SLIDER
-15
-423
-187
-456
+11
+417
+183
+450
 strength-to-loss
 strength-to-loss
 0
 100
-50.0
+0.0
 1
 1
 NIL
@@ -427,17 +428,17 @@ spawn-prob
 spawn-prob
 0
 1
-0.09
+0.0
 0.01
 1
 NIL
 HORIZONTAL
 
 SLIDER
-36
-12
-208
-45
+22
+16
+194
+49
 init-strength
 init-strength
 1.0
@@ -449,9 +450,9 @@ NIL
 HORIZONTAL
 
 SLIDER
-29
+21
 57
-201
+193
 90
 init-RU
 init-RU
@@ -472,7 +473,7 @@ tries-to-deal
 tries-to-deal
 1.0
 100.0
-50.0
+100.0
 1.0
 1
 NIL
@@ -498,9 +499,9 @@ PENS
 "starks" 1.0 0 -13345367 true "" "plot sum [strength] of starks"
 
 CHOOSER
-692
+710
 116
-830
+848
 161
 starks-strategy
 starks-strategy
@@ -508,14 +509,14 @@ starks-strategy
 1
 
 CHOOSER
-694
+708
 175
-834
+848
 220
 baratheons-strategy
 baratheons-strategy
 "boulware" "lineal" "conceder"
-1
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
