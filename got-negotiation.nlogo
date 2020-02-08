@@ -254,7 +254,6 @@ end
 to-report nego-temporal[agent t]
   let r [RU] of one-of turtles-here with [who = agent]
   let b [beta] of one-of turtles-here with [who = agent]
-  report (1.0 - (1.0 - r))*((t / tries-to-deal)^(1.0 / b))
   report 1.0 - (1.0 - r)*((t / tries-to-deal)^(1.0 / b))
 end
 
