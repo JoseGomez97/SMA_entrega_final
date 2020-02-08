@@ -210,15 +210,30 @@ to negotiate
 
       set Sbuyer nego-temporal the-buyer i
       set Sseller nego-temporal the-seller i
+<<<<<<< Updated upstream
       set asking asking * Sbuyer
       set offer start-offer * (2.0 - Sseller)
       show asking
       show offer
+=======
+      set asking start-asking * Sseller
+      if (start-offer / Sbuyer) <= [strength] of one-of turtles-here with [who = the-buyer][
+        set offer start-offer / Sbuyer
+      ]
+>>>>>>> Stashed changes
     ]
 
     set i i + 1.0
   ]
+<<<<<<< Updated upstream
   if to-deal = false [fight]
+=======
+  show i;;Debug de que vaya bien la cosa
+  if to-deal = false [
+    show "Ha fallado una negociación"
+    fight
+  ]
+>>>>>>> Stashed changes
 end
 
 to sell-patch [seller buyer payment];;Function that do the payment
@@ -240,6 +255,7 @@ to-report nego-temporal[agent t]
   let r [RU] of one-of turtles-here with [who = agent]
   let b [beta] of one-of turtles-here with [who = agent]
   report (1.0 - (1.0 - r))*((t / tries-to-deal)^(1.0 / b))
+  report 1.0 - (1.0 - r)*((t / tries-to-deal)^(1.0 / b))
 end
 
 to fight;;A fight, where all the lords loss strength due to rival strength
