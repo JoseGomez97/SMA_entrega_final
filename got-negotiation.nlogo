@@ -194,9 +194,10 @@ to negotiate
   ]
   ;;NEGOTIATION
   let to-deal false
-  let asking [price] of one-of turtles-here with [who = the-seller]
+  let start-asking [price] of one-of turtles-here with [who = the-seller]
+  let asking start-asking
   let start-offer [willing] of one-of turtles-here with [who = the-buyer]
-  let offer [willing] of one-of turtles-here with [who = the-buyer]
+  let offer start-offer
   let i 1.0
   let Sbuyer 1.0
   let Sseller 1.0
