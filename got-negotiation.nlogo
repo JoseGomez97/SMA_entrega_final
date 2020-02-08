@@ -55,8 +55,8 @@ to setup-lords
     set strength init-strength
     set label precision strength 2
     set RU init-RU
-    set price strength;;TODO: change for a slider
-    set willing (strength / 5.0);;TODO: change for a slider
+    set price strength
+    set willing (strength / 5.0)
     ifelse baratheons-strategy = "boulware"[
       set beta 0.25
     ]
@@ -81,7 +81,7 @@ to go
     stop
   ]
   if (count starks) = 0 [
-    show "baratheonss win!"
+    show "baratheons win!"
     stop
   ]
   tick
@@ -210,20 +210,20 @@ to negotiate
       set Sbuyer nego-temporal the-buyer i
       set Sseller nego-temporal the-seller i
       set asking start-asking * Sseller
-      set offer start-offer / Sbuyer
+      if (start-offer / Sbuyer) <= [strength] of one-of turtles-here with [who = the-buyer] [
+        set offer start-offer / Sbuyer
+      ]
     ]
-
     set i i + 1.0
   ]
   if to-deal = false [
-    show "Ha fallado una negociación"
     fight
   ]
 end
 
-to sell-patch [seller buyer payment];;Function that do the payment
+to sell-patch [seller buyer payment];;Function to sell the patch
   ask turtles-here[
-    if who = buyer [;;The buyer stays on the
+    if who = buyer [;;The buyer stays on the patch
       set strength strength - payment
       ifelse breed = starks
       [set pcolor 107]
@@ -239,10 +239,10 @@ end
 to-report nego-temporal[agent t]
   let r [RU] of one-of turtles-here with [who = agent]
   let b [beta] of one-of turtles-here with [who = agent]
-  report (1.0 - (1.0 - r))*((t / tries-to-deal)^(1.0 / b))
+  report 1.0 - (1.0 - r)*((t / tries-to-deal)^(1.0 / b))
 end
 
-to fight;;A fight, where all the lords loss strength due to rival strength
+to fight;;A fight, where all the agents loss as strength as rival strength
   ;;THE FIGTH
   let aux-s-strength [strength] of one-of starks-here
   let aux-b-strength [strength] of one-of baratheons-here
@@ -258,7 +258,7 @@ to update
   ask turtles[
     set label precision strength 2
     set price strength
-    set willing (strength / 2.0)
+    set willing (strength / 5.0)
     if strength <= 0 [
       die
     ]
@@ -318,7 +318,7 @@ num-starks
 num-starks
 0
 20
-20.0
+5.0
 1
 1
 NIL
@@ -333,7 +333,7 @@ num-baratheons
 num-baratheons
 0
 20
-20.0
+5.0
 1
 1
 NIL
@@ -347,9 +347,9 @@ SLIDER
 probability-to-win-strength
 probability-to-win-strength
 0
-100
-23.0
-1
+20
+1.0
+0.5
 1
 NIL
 HORIZONTAL
@@ -428,7 +428,7 @@ spawn-prob
 spawn-prob
 0
 1
-0.0
+0.1
 0.01
 1
 NIL
@@ -443,7 +443,7 @@ init-strength
 init-strength
 1.0
 500.0
-376.0
+1.0
 1.0
 1
 NIL
