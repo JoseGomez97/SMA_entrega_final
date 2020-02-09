@@ -93,8 +93,8 @@ to move-families
     if (probability-to-win-strength > random 100) and (pcolor = 107)[;only if they're on a own patch, they can get strength
      set strength strength + 1
     ]
-    if loss-to-conquer and (pcolor = 37)[;if they're on a rival patch, they can loss strength to conquer it
-     set strength strength - strength-to-loss
+    if (pcolor = 37)[;if they're on a rival patch, they can loss strength to conquer it
+     set strength strength - loss-on-conquer
     ]
     set pcolor 107
   ]
@@ -103,8 +103,8 @@ to move-families
     if (probability-to-win-strength > random 100) and (pcolor = 37) [;only if they're on a own patch, they can get strength
      set strength strength + 1
     ]
-    if loss-to-conquer and (pcolor = 107) [;if they're on a rival patch, they can loss strength to conquer it
-     set strength strength - strength-to-loss
+    if (pcolor = 107) [;if they're on a rival patch, they can loss strength to conquer it
+     set strength strength - loss-on-conquer
     ]
     set pcolor 37
   ]
@@ -318,7 +318,7 @@ num-starks
 num-starks
 0
 20
-5.0
+10.0
 1
 1
 NIL
@@ -333,22 +333,22 @@ num-baratheons
 num-baratheons
 0
 20
-5.0
+10.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-1
-325
-199
-358
+5
+323
+203
+356
 probability-to-win-strength
 probability-to-win-strength
 0
 20
-1.0
+2.0
 0.5
 1
 NIL
@@ -393,24 +393,13 @@ count starks
 1
 11
 
-SWITCH
-22
-375
-164
-408
-loss-to-conquer
-loss-to-conquer
-0
-1
--1000
-
 SLIDER
-11
-417
-183
-450
-strength-to-loss
-strength-to-loss
+14
+374
+186
+407
+loss-on-conquer
+loss-on-conquer
 0
 100
 0.0
@@ -428,7 +417,7 @@ spawn-prob
 spawn-prob
 0
 1
-0.1
+0.0
 0.01
 1
 NIL
@@ -443,7 +432,7 @@ init-strength
 init-strength
 1.0
 500.0
-1.0
+4.0
 1.0
 1
 NIL
@@ -456,7 +445,7 @@ SLIDER
 90
 init-RU
 init-RU
-0
+0.01
 1
 0.35
 0.01
@@ -516,7 +505,7 @@ CHOOSER
 baratheons-strategy
 baratheons-strategy
 "boulware" "lineal" "conceder"
-0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
