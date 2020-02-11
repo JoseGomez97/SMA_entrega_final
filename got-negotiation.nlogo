@@ -1,6 +1,11 @@
 breed[starks stark]
 breed[baratheons baratheon]
 
+globals[
+  negoFails
+  negoDone
+]
+
 turtles-own[
   strength
   willing;;what we offer (buyer)
@@ -20,6 +25,8 @@ end
 to setup-patches
   ask patches [
     set pcolor white
+    set negoFails 0
+    set negoDone 0
   ]
 end
 
@@ -203,6 +210,7 @@ to negotiate
   while [(to-deal = false) and (i <= tries-to-deal)] [
     ifelse asking <= offer [;;if we arrive to a deal, seller sells the patch
       sell-patch the-seller the-buyer offer
+      set negoDone negoDone + 1
       set to-deal true
     ]
     [
@@ -217,6 +225,7 @@ to negotiate
     set i i + 1.0
   ]
   if to-deal = false [
+    set negoFails negoFails + 1
     fight
   ]
 end
@@ -417,7 +426,7 @@ spawn-prob
 spawn-prob
 0
 1
-0.0
+0.17
 0.01
 1
 NIL
@@ -447,7 +456,7 @@ init-RU
 init-RU
 0.01
 1
-0.35
+0.85
 0.01
 1
 NIL
@@ -506,6 +515,28 @@ baratheons-strategy
 baratheons-strategy
 "boulware" "lineal" "conceder"
 1
+
+MONITOR
+688
+392
+805
+437
+Failed negotiations
+negoFails
+17
+1
+11
+
+MONITOR
+689
+443
+841
+488
+Satisfactory Negotiations
+negoDone
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
